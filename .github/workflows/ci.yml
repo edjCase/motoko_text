@@ -1,0 +1,40 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Install MOPS
+        run: npm i -g ic-mops
+
+      - name: Install Vessel
+        run: |
+          sudo wget https://github.com/dfinity/vessel/releases/download/v0.6.4/vessel-linux64 -O /usr/bin/vessel
+          sudo chmod +x /usr/bin/vessel
+
+      - name: Set up wasmtime
+        uses: mwilliamson/setup-wasmtime-action@v1.0
+        with:
+          wasmtime-version: 4.0.0
+
+      - name: Download MOPS packages
+        run: mops install
+
+      - name: Check for errors strict
+        run: make check-strict
+
+      - name: Run Tests
+        run: make test
