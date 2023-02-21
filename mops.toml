@@ -1,8 +1,12 @@
 [dependencies]
 base = "0.8.1"
+xtended-numbers = "0.2.0"
 
 [package]
-name = ""
+name = "xtended-text"
 version = "0.1.0"
-description = "A library for "
-repository = "https://github.com/edjcase/motoko_"
+description = "A library for text manipulation"
+repository = "https://github.com/edjcase/motoko_text"
+
+[dev-dependencies]
+test = "1.0.1"
