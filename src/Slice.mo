@@ -1,133 +1,166 @@
 import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
+import Nat "mo:base/Nat";
 module Slice {
 
-    public type Slice<T> = {
-        match : (cases : [MatchType<T>], catchAllCase : MatchCatchAll<T>) -> Slice<T>;
-        toIter : () -> Iter.Iter<T>;
-    };
-
-    public type StaticValue<T> = {
+    public type Sequence<T> = {
         #array : [T];
         #buffer : Buffer.Buffer<T>;
+        #slice : Slice<T>;
     };
 
-    public type Value<T> = StaticValue<T> or {
-        #iter : Iter.Iter<T>;
+    public type OnMatch<T> = Slice<T> -> Slice<T>;
+
+    public type SliceMatchInfo<T> = {
+        startsWith : Sequence<T>;
+        endsWith : Sequence<T>;
+        trimMatch : Bool;
+        strictStart : Bool;
     };
 
-    public type MatchCatchAll<T> = Slice<T> -> Slice<T>;
-
-    public type AffixMatch<T> = {
-        value : Value<T>;
-        onMatch : { #strip };
-    };
-
-    public type MatchType<T> = {
-        #prefix : AffixMatch<T>;
-        #suffix : AffixMatch<T>;
-    };
-
-    private func getValueSize<T>(value : StaticValue<T>) : Nat {
-        switch (value) {
-            case (#array(a)) a.size();
-            case (#buffer(b)) b.size();
-        };
-    };
-
-    private func getStaticValue<T>(value : Value<T>) : StaticValue<T> {
-        switch (value) {
-            case (#iter(i)) #buffer(Buffer.fromIter(i));
-            case (#array(a)) #array(a);
-            case (#buffer(b)) #buffer(b);
-        };
-    };
-
-    private func getAtIndex<T>(value : StaticValue<T>, i : Nat) : T {
-        switch (value) {
-            case (#array(a)) a[i];
-            case (#buffer(b)) b.get(i);
-        };
-    };
-
-    public func Slice<T>(
-        value : Value<T>,
+    public class Slice<T>(
+        sequence : Sequence<T>,
         comparer : (T, T) -> Bool,
-        startIndex : Nat,
-        length : ?Nat,
-    ) : Slice<T> = object sliceRef {
-        let originalStartIndex = startIndex;
-        let staticValue = getStaticValue(value);
-        let valueSize = getValueSize(staticValue);
-        let originalLength : Nat = switch (length) {
-            // If no length specified, stop at end of chars
+        sliceOffset : Nat,
+        sliceLength : ?Nat,
+    ) : Slice<T> = sliceRef {
+
+        private func getSequenceSize(sequence : Sequence<T>) : Nat {
+            switch (sequence) {
+                case (#array(a)) a.size();
+                case (#buffer(b)) b.size();
+                case (#slice(s)) s.size();
+            };
+        };
+        let sequenceSize : Nat = getSequenceSize(sequence);
+        let calculatedSliceLength : Nat = switch (sliceLength) {
+            // If no sliceLength specified, stop at end of chars
             case (null) {
-                if (startIndex >= valueSize) {
-                    Debug.trap("Start index must be less than the length of the value");
+                if (sliceOffset >= sequenceSize) {
+                    Debug.trap("Start index must be less than the sliceLength of the sequence");
                 };
-                valueSize - startIndex;
+                sequenceSize - sliceOffset;
             };
             case (?l) {
-                if (startIndex + l >= valueSize) {
-                    Debug.trap("Start index + length must be less than the length of the value");
+                if (sliceOffset + l > sequenceSize) {
+                    // print all the variables
+                    Debug.print("sliceOffset: " # debug_show sliceOffset # " sliceLength: " # debug_show l # " sequenceSize: " # debug_show sequenceSize);
+                    Debug.trap("Start index + sliceLength must be less than the sliceLength of the sequence");
                 };
                 l;
             };
         };
 
-        public func slice(startIndex : Nat, length : ?Nat) : Slice<T> {
-            Slice<T>(value, comparer, originalStartIndex + startIndex, length);
+        public func slice(offset : Nat, length : ?Nat) : Slice<T> {
+            Slice<T>(sequence, comparer, sliceOffset + offset, length);
         };
 
-        public func match(cases : [MatchType<T>], catchAllCase : MatchCatchAll<T>) : Slice<T> {
-            for (c in Iter.fromArray(cases)) {
+        public func get(index : Nat) : T {
+            getFromSequence(sequence, sliceOffset + index);
+        };
 
-                let result = switch (c) {
-                    case (#prefix(prefix)) matchesFix(prefix, true);
-                    case (#suffix(suffix)) matchesFix(suffix, false);
-                };
-                switch (result) {
-                    case (null)(); // Didn't match case, try next case
-                    case (?slice) return slice; // matched case, return result
-                };
+        public func size() : Nat {
+            calculatedSliceLength;
+        };
+
+        public func indexOf(subset : Sequence<T>) : ?Nat {
+            indexOfInternal(subset, false);
+        };
+
+        public func indexOfInternal(subset : Sequence<T>, onlyStartsWith : Bool) : ?Nat {
+            let subsetSize = getSequenceSize(subset);
+            if (subsetSize > calculatedSliceLength) {
+                return null;
             };
-            catchAllCase(sliceRef);
+            // Create a loop that iterates through the slice, excluding the last x characters where x is the sequence size
+            label f1 for (sliceIndex in Iter.range(0, calculatedSliceLength - subsetSize)) {
+                // Check if the slice at the current index matches the sequence
+                label f2 for (subsetIndex in Iter.range(0, subsetSize - 1)) {
+                    let subsetValue = getFromSequence(subset, subsetIndex);
+                    let sliceValue = get(sliceIndex + subsetIndex);
+                    if (not comparer(sliceValue, subsetValue)) {
+                        if (onlyStartsWith) {
+                            // If only startswith, then fail on the first check
+                            return null;
+                        };
+                        // If not matched, continue to next index
+                        continue f1;
+                    };
+                };
+                // If fully matched, return the index
+                return ?sliceIndex;
+            };
+            return null;
+        };
+
+        public func tryMatchSlice(matchInfo : SliceMatchInfo<T>) : ?Slice<T> {
+            do ? {
+                // Get index where prefix starts
+                let prefixStartIndex : Nat = indexOfInternal(matchInfo.startsWith, matchInfo.strictStart)!;
+
+                // Get prefix slice
+                let prefixSlice = slice(prefixStartIndex, null);
+
+                // Get index where suffix starts
+                let suffixStartIndex : Nat = prefixSlice.indexOf(matchInfo.endsWith)!;
+
+                let suffixLength : Nat = getSequenceSize(matchInfo.endsWith);
+                let (sliceOffset : Nat, sliceLength : Nat) = if (matchInfo.trimMatch) {
+                    // prefix and suffix NOT included
+                    let prefixLength : Nat = getSequenceSize(matchInfo.startsWith);
+                    let sliceLength : Nat = suffixStartIndex - prefixStartIndex - prefixLength + 1;
+                    (prefixStartIndex + prefixLength, sliceLength);
+                } else {
+                    // prefix and suffix included
+                    (prefixStartIndex, suffixStartIndex + suffixLength);
+                };
+
+                slice(sliceOffset, ?sliceLength);
+            };
         };
 
         public func toIter() : Iter.Iter<T> {
-            switch (staticValue) {
-                case (#array(a)) a.vals();
-                case (#buffer(b)) b.vals();
+            switch (sequence) {
+                case (#array(a)) toIterInternal(a.size(), func(i) = a[i]);
+                case (#buffer(b)) toIterInternal(b.size(), func(i) = b.get(i));
+                case (#slice(s)) s.toIter();
             };
         };
 
-        private func matchesFix(affix : AffixMatch<T>, isPre : Bool) : ?Slice<T> {
-            let staticAffix = getStaticValue(affix.value);
-            let affixSize = getValueSize<T>(staticAffix);
-            if (valueSize < affixSize) {
-                return null;
+        private func getFromSequence(sequence : Sequence<T>, index : Nat) : T {
+            switch (sequence) {
+                case (#array(a)) a[index];
+                case (#buffer(b)) b.get(index);
+                case (#slice(s)) s.get(index);
             };
-            if (affixSize < 1) {
-                return ?sliceRef;
-            };
+        };
 
-            let (startIndex : Nat, length : Nat) = if (isPre) {
-                (0, affixSize - 1) : (Nat, Nat);
-            } else {
-                (valueSize - 1 - affixSize, valueSize - 1) : (Nat, Nat);
-            };
+        private func toIterInternal(size : Nat, getValue : Nat -> T) : Iter.Iter<T> {
+            var iterLength = 0;
+            // Create a new iter object to iterate through the slice
+            {
+                next = func() : ?T {
 
-            for (i in Iter.range(startIndex, length)) {
-                let v = getAtIndex(staticValue, i);
-                let f = getAtIndex(staticAffix, i);
-                let matched = comparer(f, v);
-                if (not matched) {
-                    return null;
+                    switch (sliceLength) {
+                        case (null) {
+                            if (iterLength + sliceOffset >= size) {
+                                // If reached the end of array, return null
+                                return null;
+                            };
+                        };
+                        case (?l) {
+                            if (iterLength >= l) {
+                                // If reached the end of sliceLength, return null
+                                return null;
+                            };
+                        };
+                    };
+                    let value = getValue(iterLength + sliceOffset);
+                    iterLength += 1;
+                    ?value;
                 };
             };
-
-            return ?slice(startIndex, ?length);
         };
 
     };

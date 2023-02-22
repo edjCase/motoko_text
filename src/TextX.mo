@@ -10,28 +10,53 @@ import Array "mo:base/Array";
 
 module TextX {
 
-    public type TextValue = Slice.Value<Char> or {
+    public type Sequence = Slice.Sequence<Char> or {
         #text : Text;
     };
-    public type MatchCatchAll = TextSlice -> TextSlice;
 
-    public type AffixMatch = {
-        value : TextValue;
-        onMatch : { #strip };
+    public type MapSlice<T> = TextSlice -> T;
+
+    public type SliceMatchInfo = {
+        startsWith : Sequence;
+        endsWith : Sequence;
+        trimMatch : Bool;
+        strictStart : Bool;
     };
 
-    public type MatchType = {
-        #prefix : AffixMatch;
-        #suffix : AffixMatch;
+    public type MappedSliceMatchInfo<T> = SliceMatchInfo and {
+        map : MapSlice<T>;
     };
 
-    public class TextSlice(innerSlice : Slice.Slice<Char>) {
+    public class TextSlice(innerSlice : Slice.Slice<Char>) = sliceRef {
 
-        public func match(cases : [MatchType], catchAllCase : MatchCatchAll) : TextSlice {
-            let innerCases : [Slice.MatchType<Char>] = Array.map(cases, mapCase);
-            let innerCatchAllCase : Slice.MatchCatchAll<Char> = mapBody(catchAllCase);
-            let newInnerSlice = innerSlice.match(innerCases, innerCatchAllCase);
-            TextSlice(newInnerSlice);
+        public func tryMatchSlice(info : SliceMatchInfo) : ?TextSlice {
+            let innerTokenMatchInfo = mapInfo(info); // Map to inner slice match info
+            switch (innerSlice.tryMatchSlice(innerTokenMatchInfo)) {
+                case (null) null; // If not matched, return null
+                case (?s) ?TextSlice(s); // If matched, map the slice
+            };
+        };
+
+        public func tryMatchAndMapSlice<T>(info : MappedSliceMatchInfo<T>) : ?T {
+            switch (tryMatchSlice(info)) {
+                case (null) null; // If not matched, return null
+                case (?s) ?info.map(s); // If matched, map the slice
+            };
+        };
+
+        public func matchAndMapSlice<T>(cases : [MappedSliceMatchInfo<T>], catchAllCase : MapSlice<T>) : T {
+            for (c in Iter.fromArray(cases)) {
+                let result = tryMatchAndMapSlice(c);
+                switch (result) {
+                    case (null)(); // Didn't match case, try next case
+                    case (?slice) return slice; // matched case, return result
+                };
+            };
+            catchAllCase(sliceRef);
+        };
+
+        public func slice(startIndex : Nat, length : ?Nat) : TextSlice {
+            TextSlice(innerSlice.slice(startIndex, length));
         };
 
         public func asCharSequence() : Slice.Slice<Char> {
@@ -46,39 +71,29 @@ module TextX {
             Text.fromIter(toIter());
         };
 
-        private func mapCase(c : MatchType) : Slice.MatchType<Char> {
-            switch (c) {
-                case (#prefix(p)) #prefix({
-                    value = mapValue(p.value);
-                    onMatch = p.onMatch;
-                });
-                case (#suffix(s)) #suffix({
-                    value = mapValue(s.value);
-                    onMatch = s.onMatch;
-                });
-            };
-        };
-
-        private func mapBody(body : MatchCatchAll) : Slice.MatchCatchAll<Char> {
-            func(textSlice : Slice.Slice<Char>) : Slice.Slice<Char> {
-                body(TextSlice(textSlice)).asCharSequence();
+        private func mapInfo(c : SliceMatchInfo) : Slice.SliceMatchInfo<Char> {
+            {
+                startsWith = mapValue(c.startsWith);
+                endsWith = mapValue(c.endsWith);
+                trimMatch = c.trimMatch;
+                strictStart = c.strictStart;
             };
         };
     };
 
-    public func slice(value : TextValue, startIndex : Nat, length : ?Nat) : TextSlice {
-        let innerValue : Slice.Value<Char> = mapValue(value);
+    public func slice(value : Sequence, startIndex : Nat, length : ?Nat) : TextSlice {
+        let innerValue : Slice.Sequence<Char> = mapValue(value);
 
         let innerSlice = Slice.Slice<Char>(innerValue, Char.equal, startIndex, length);
         TextSlice(innerSlice);
     };
 
-    private func mapValue(value : TextValue) : Slice.Value<Char> {
+    private func mapValue(value : Sequence) : Slice.Sequence<Char> {
         switch (value) {
             case (#text(t)) #buffer(Buffer.fromIter<Char>(t.chars()));
-            case (#iter(i)) #iter(i);
             case (#array(a)) #array(a);
             case (#buffer(b)) #buffer(b);
+            case (#slice(s)) #slice(s);
         };
     };
 
@@ -137,112 +152,5 @@ module TextX {
                 };
             };
         };
-    };
-
-    private class Reader(iter : Iter.Iter<Char>) {
-        var peekCache : ?Char = null;
-        var currentValue : ?Char = null;
-        public var position : ?Nat = null;
-
-        public func current() : ?Char {
-            currentValue;
-        };
-
-        public func peek() : ?Char {
-            if (peekCache == null) {
-                peekCache := iter.next();
-            };
-            return peekCache;
-        };
-
-        public func next() : ?Char {
-            position := switch (position) {
-                case (null) ?0;
-                case (?p) ?(p + 1);
-            };
-            if (peekCache == null) {
-                iter.next();
-            } else {
-                let next = peekCache;
-                // clear cache since it moved to next
-                peekCache := null;
-                currentValue := next;
-                next;
-            };
-        };
-
-        public func skipWhitespace() : () {
-            loop {
-                switch (isNextWhitespace()) {
-                    case (?true) {
-                        let _ = next(); // Skip whitespace
-                    };
-                    case (_) {
-                        return;
-                    };
-                };
-            };
-        };
-
-        public func readUntil(
-            pattern : { #char : Char; #text : Text; #whitespace; #end },
-            mustMatchPattern : Bool,
-        ) : ?Text {
-            do ? {
-                let isPatternMatched : (char : Char) -> Bool = switch (pattern) {
-                    case (#char(c)) func(char : Char) : Bool {
-                        c == char;
-                    };
-                    case (#text(t)) {
-                        var currentText : Text = "";
-                        func(char : Char) : Bool {
-                            // Append the character to the end of the current text value
-                            currentText := currentText # Text.fromChar(char);
-                            // If the current text is the prefix, then its potentially the right value
-                            if (Text.startsWith(t, #text(currentText))) {
-                                t == currentText; // Return true if not just the prefix but whole value
-                            } else {
-                                // If not partially matching, reset 'current text value'
-                                currentText := ""; // reset
-                                false;
-                            };
-                        };
-                    };
-                    case (#whitespace) Char.isWhitespace;
-                    case (#end) func(char : Char) : Bool {
-                        false; // Awlays return false because if there is a character, its not the end
-                    };
-                };
-
-                let charBuffer = Buffer.Buffer<Char>(0);
-                label l loop {
-                    let currentChar : Char = switch (next()) {
-                        case (null) {
-                            // Check to see if the end of characters is expected, if not return null
-                            if (not mustMatchPattern or pattern == #end) {
-                                break l;
-                            };
-                            return null;
-                        };
-                        case (?c) c;
-                    };
-
-                    let patternMatched : Bool = isPatternMatched(currentChar);
-                    charBuffer.add(currentChar);
-                    if (patternMatched) {
-                        break l;
-                    };
-                };
-                return ?Text.fromIter(charBuffer.vals()); // TODO optimize each char becoming text and concat? Cant find a Buffer<Char> -> Text
-            };
-        };
-
-        private func isNextWhitespace() : ?Bool {
-            do ? {
-                let nextChar = peek()!;
-                Char.isWhitespace(nextChar);
-            };
-        };
-
     };
 };
