@@ -3,6 +3,7 @@ import Text "mo:base/Text";
 import Iter "mo:base/Iter";
 import Debug "mo:base/Debug";
 import { test } "mo:test";
+import Array "mo:base/Array";
 
 test(
     "toUpper",
@@ -21,13 +22,18 @@ test(
 );
 
 test(
-    "fromUtf8Bytes",
+    "to and fromUtf8Bytes",
     func() {
         let check = func(bytes : [Nat8], expected : Text) {
             let actual = Text.fromIter(TextX.fromUtf8Bytes(Iter.fromArray(bytes)));
             if (actual != expected) {
                 Debug.trap("expected: '" # expected # "', actual: '" # actual # "'");
             };
+            let actualBytes = Iter.toArray(TextX.toUtf8Bytes(actual.chars()));
+            if (actualBytes != bytes) {
+                Debug.trap("expected: '" # debug_show (bytes) # "', actual: '" # debug_show (actualBytes) # "'");
+            };
+
         };
         check([0x61, 0x62, 0x63, 0x64, 0x65], "abcde");
         check([0xC3, 0xA9], "é");

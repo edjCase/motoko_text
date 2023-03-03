@@ -31,6 +31,70 @@ module TextX {
         return Utf8CharIter(bytes);
     };
 
+    public func toUtf8Bytes(characters : Iter.Iter<Char>) : Iter.Iter<Nat8> {
+        return Utf8ByteIter(characters);
+    };
+
+    private class Utf8ByteIter(chars : Iter.Iter<Char>) : Iter.Iter<Nat8> {
+        let buffer = Buffer.Buffer<Nat8>(4);
+
+        public func next() : ?Nat8 {
+            if (buffer.size() <= 0) {
+                getNextSetOfBytes(); // Populate buffer
+            };
+            if (buffer.size() <= 0) {
+                return null; // If still no bytes, we are done
+            };
+            return ?buffer.remove(buffer.size() - 1); // Remove from end for optimization
+        };
+
+        private func getNextSetOfBytes() {
+            let char = switch (chars.next()) {
+                case (?char) char;
+                case (null) return;
+            };
+            let nat32 = Char.toNat32(char);
+            if (nat32 <= 0x7F) {
+                // Single byte encoding
+                // 0xxxxxxx
+                let byte1 = NatX.from32To8(nat32);
+                buffer.add(byte1);
+            } else if (nat32 <= 0x7FF) {
+                // Two bytes encoded
+                // 110xxxxx 10xxxxxx
+                let byte1 = NatX.from32To8((nat32 >> 6) | 0xC0);
+                let byte2 = NatX.from32To8((nat32 & 0x3F) | 0x80);
+                // Add in reverse order for optimization when getting next byte
+                buffer.add(byte2);
+                buffer.add(byte1);
+            } else if (nat32 <= 0xFFFF) {
+                // Three bytes encoded
+                // 1110xxxx 10xxxxxx 10xxxxxx
+                let byte1 = NatX.from32To8((nat32 >> 12) | 0xE0);
+                let byte2 = NatX.from32To8(((nat32 >> 6) & 0x3F) | 0x80);
+                let byte3 = NatX.from32To8((nat32 & 0x3F) | 0x80);
+                // Add in reverse order for optimization when getting next byte
+                buffer.add(byte3);
+                buffer.add(byte2);
+                buffer.add(byte1);
+            } else if (nat32 <= 0x10FFFF) {
+                // Four bytes encoded
+                // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+                let byte1 = NatX.from32To8((nat32 >> 18) | 0xF0);
+                let byte2 = NatX.from32To8(((nat32 >> 12) & 0x3F) | 0x80);
+                let byte3 = NatX.from32To8(((nat32 >> 6) & 0x3F) | 0x80);
+                let byte4 = NatX.from32To8((nat32 & 0x3F) | 0x80);
+                // Add in reverse order for optimization when getting next byte
+                buffer.add(byte4);
+                buffer.add(byte3);
+                buffer.add(byte2);
+                buffer.add(byte1);
+            } else {
+                Debug.trap("Invalid UTF8 character: " # Char.toText(char));
+            };
+        };
+    };
+
     private class Utf8CharIter(bytes : Iter.Iter<Nat8>) : Iter.Iter<Char> {
         private func nextNat32(isSubByte : Bool) : ?Nat32 {
             do ? {
