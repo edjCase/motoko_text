@@ -9,6 +9,7 @@ import Array "mo:base/Array";
 import CharX "CharX";
 import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
+import Prelude "mo:base/Prelude";
 
 module TextX {
     public func toLower(text : Text) : Text {
@@ -25,6 +26,37 @@ module TextX {
             buffer.add(CharX.toUpper(char));
         };
         return Text.fromIter(buffer.vals());
+    };
+
+    public func slice(text : Text, startIndex : Nat, length : Nat) : Text {
+        if (length < 1 or startIndex >= text.size()) {
+            return "";
+        };
+        let buffer = Buffer.Buffer<Char>(length);
+        let textIter = text.chars();
+        var i = 0;
+        label l loop {
+            if (i >= startIndex) {
+                break l;
+            };
+            let _ = textIter.next();
+            i += 1;
+        };
+
+        var j = 0;
+        label l loop {
+            if (j >= length) {
+                break l;
+            };
+            let ?char = textIter.next() else break l;
+            buffer.add(char);
+            j += 1;
+        };
+        return Text.fromIter(buffer.vals());
+    };
+
+    public func sliceToEnd(text : Text, startIndex : Nat) : Text {
+        slice(text, startIndex, text.size() - startIndex);
     };
 
     public func fromUtf8Bytes(bytes : Iter.Iter<Nat8>) : Iter.Iter<Char> {

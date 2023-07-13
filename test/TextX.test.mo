@@ -5,19 +5,46 @@ import Debug "mo:base/Debug";
 import { test } "mo:test";
 import Array "mo:base/Array";
 
+func assertText(actual : Text, expected : Text) {
+    if (actual != expected) {
+        Debug.trap("expected: '" # expected # "', actual: '" # actual # "'");
+    };
+};
+
 test(
     "toUpper",
     func() {
-        assert (TextX.toUpper("abcdefghijklmnopqrstuvwxyz0123456789!") == "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!");
-        assert (TextX.toUpper("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!") == "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!");
+        assertText(TextX.toUpper("abcdefghijklmnopqrstuvwxyz0123456789!"), "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!");
+        assertText(TextX.toUpper("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"), "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!");
     },
 );
 
 test(
     "toLower",
     func() {
-        assert (TextX.toLower("abcdefghijklmnopqrstuvwxyz0123456789!") == "abcdefghijklmnopqrstuvwxyz0123456789!");
-        assert (TextX.toLower("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!") == "abcdefghijklmnopqrstuvwxyz0123456789!");
+        assertText(TextX.toLower("abcdefghijklmnopqrstuvwxyz0123456789!"), "abcdefghijklmnopqrstuvwxyz0123456789!");
+        assertText(TextX.toLower("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"), "abcdefghijklmnopqrstuvwxyz0123456789!");
+    },
+);
+
+test(
+    "slice",
+    func() {
+        assertText(TextX.slice("Hello", 1, 3), "ell");
+        assertText(TextX.slice("Hello", 1, 1), "e");
+        assertText(TextX.slice("Hello", 1, 0), "");
+        assertText(TextX.slice("Hello", 0, 5), "Hello");
+        assertText(TextX.slice("Hello", 0, 6), "Hello");
+        assertText(TextX.slice("Hello", 6, 6), "");
+    },
+);
+
+test(
+    "sliceToEnd",
+    func() {
+        assertText(TextX.sliceToEnd("Hello", 1), "ello");
+        assertText(TextX.sliceToEnd("Hello", 0), "Hello");
+        assertText(TextX.sliceToEnd("Hello", 5), "");
     },
 );
 
