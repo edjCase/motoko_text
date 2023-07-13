@@ -1,7 +1,6 @@
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Buffer "mo:base/Buffer";
-import Blob "mo:base/Blob";
 import Char "mo:base/Char";
 import NatX "mo:xtended-numbers/NatX";
 import Debug "mo:base/Debug";
