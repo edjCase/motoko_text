@@ -4,6 +4,7 @@ import Iter "mo:base/Iter";
 import Debug "mo:base/Debug";
 import { test } "mo:test";
 import Array "mo:base/Array";
+import Bool "mo:base/Bool";
 
 func assertText(actual : Text, expected : Text) {
     if (actual != expected) {
@@ -67,5 +68,36 @@ test(
         check([0xE2, 0x82, 0xAC], "€");
         check([0xF0, 0xA3, 0x8F, 0xA6], "𣏦");
         check([0xF0, 0x9F, 0x98, 0x81], "😁");
+    },
+);
+
+test(
+    "isEmpty",
+    func() {
+        let check = func(value : Text, expected : Bool) {
+            if (TextX.isEmpty(value) != expected) {
+                Debug.trap("Value: " # value # ", expected: '" # Bool.toText(expected) # "', actual: '" # value # "'");
+            };
+
+        };
+        check("", true);
+        check(" ", false);
+        check("  ", false);
+        check("sdfsdf", false);
+    },
+);
+test(
+    "isEmptyOrWhitespace",
+    func() {
+        let check = func(value : Text, expected : Bool) {
+            if (TextX.isEmptyOrWhitespace(value) != expected) {
+                Debug.trap("Value: " # value # ", expected: '" # Bool.toText(expected) # "', actual: '" # value # "'");
+            };
+
+        };
+        check("", true);
+        check(" ", true);
+        check("  ", true);
+        check("sdfsdf", false);
     },
 );

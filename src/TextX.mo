@@ -66,6 +66,19 @@ module TextX {
         return Utf8ByteIter(characters);
     };
 
+    public func isEmpty(text : Text) : Bool {
+        text.size() == 0;
+    };
+
+    public func isEmptyOrWhitespace(text : Text) : Bool {
+        for (char in text.chars()) {
+            if (not Char.isWhitespace(char)) {
+                return false;
+            };
+        };
+        return true;
+    };
+
     private class Utf8ByteIter(chars : Iter.Iter<Char>) : Iter.Iter<Nat8> {
         let buffer = Buffer.Buffer<Nat8>(4);
 
