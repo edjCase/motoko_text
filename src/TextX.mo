@@ -4,13 +4,17 @@ import Buffer "mo:base/Buffer";
 import Char "mo:base/Char";
 import NatX "mo:xtended-numbers/NatX";
 import Debug "mo:base/Debug";
-import Array "mo:base/Array";
 import CharX "CharX";
 import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
-import Prelude "mo:base/Prelude";
 
 module TextX {
+    /// Converts all characters in the text to lowercase.
+    ///
+    /// ```motoko
+    /// let lower = TextX.toLower("Hello, World!");
+    /// // lower is "hello, world!"
+    /// ```
     public func toLower(text : Text) : Text {
         let buffer = Buffer.Buffer<Char>(text.size());
         for (char in text.chars()) {
@@ -19,6 +23,12 @@ module TextX {
         return Text.fromIter(buffer.vals());
     };
 
+    /// Converts all characters in the text to uppercase.
+    ///
+    /// ```motoko
+    /// let upper = TextX.toUpper("Hello, World!");
+    /// // upper is "HELLO, WORLD!"
+    /// ```
     public func toUpper(text : Text) : Text {
         let buffer = Buffer.Buffer<Char>(text.size());
         for (char in text.chars()) {
@@ -27,6 +37,12 @@ module TextX {
         return Text.fromIter(buffer.vals());
     };
 
+    /// Returns a substring of the given text.
+    ///
+    /// ```motoko
+    /// let sliced = TextX.slice("Hello, World!", 7, 5);
+    /// // sliced is "World"
+    /// ```
     public func slice(text : Text, startIndex : Nat, length : Nat) : Text {
         if (length < 1 or startIndex >= text.size()) {
             return "";
@@ -54,22 +70,57 @@ module TextX {
         return Text.fromIter(buffer.vals());
     };
 
+    /// Returns a substring from the given index to the end of the text.
+    ///
+    /// ```motoko
+    /// let sliced = TextX.sliceToEnd("Hello, World!", 7);
+    /// // sliced is "World!"
+    /// ```
     public func sliceToEnd(text : Text, startIndex : Nat) : Text {
         slice(text, startIndex, text.size() - startIndex);
     };
 
+    /// Converts a sequence of UTF-8 bytes to an iterator of characters.
+    ///
+    /// ```motoko
+    /// let bytes : [Nat8] = [72, 101, 108, 108, 111]; // "Hello" in UTF-8
+    /// let chars = TextX.fromUtf8Bytes(bytes.vals());
+    /// // chars is an iterator of characters 'H', 'e', 'l', 'l', 'o'
+    /// ```
     public func fromUtf8Bytes(bytes : Iter.Iter<Nat8>) : Iter.Iter<Char> {
         return Utf8CharIter(bytes);
     };
 
+    /// Converts an iterator of characters to an iterator of UTF-8 bytes.
+    ///
+    /// ```motoko
+    /// let chars = ['H', 'e', 'l', 'l', 'o'];
+    /// let bytes = TextX.toUtf8Bytes(chars.vals());
+    /// ```
     public func toUtf8Bytes(characters : Iter.Iter<Char>) : Iter.Iter<Nat8> {
         return Utf8ByteIter(characters);
     };
 
+    /// Checks if the given text is empty.
+    ///
+    /// ```motoko
+    /// let empty = TextX.isEmpty("");
+    /// // empty is true
+    /// let notEmpty = TextX.isEmpty("Hello");
+    /// // notEmpty is false
+    /// ```
     public func isEmpty(text : Text) : Bool {
         text.size() == 0;
     };
 
+    /// Checks if the given text is empty or contains only whitespace characters.
+    ///
+    /// ```motoko
+    /// let emptyOrWhitespace = TextX.isEmptyOrWhitespace("   ");
+    /// // emptyOrWhitespace is true
+    /// let notEmptyOrWhitespace = TextX.isEmptyOrWhitespace("Hello");
+    /// // notEmptyOrWhitespace is false
+    /// ```
     public func isEmptyOrWhitespace(text : Text) : Bool {
         for (char in text.chars()) {
             if (not Char.isWhitespace(char)) {

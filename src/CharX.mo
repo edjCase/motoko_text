@@ -1,12 +1,13 @@
-import Iter "mo:base/Iter";
-import Text "mo:base/Text";
-import Buffer "mo:base/Buffer";
 import Char "mo:base/Char";
-import NatX "mo:xtended-numbers/NatX";
-import Debug "mo:base/Debug";
-import Array "mo:base/Array";
 
-module TextX {
+module CharX {
+    /// Converts an uppercase character to lowercase.
+    /// If the character is not an uppercase letter, it returns the original character.
+    ///
+    /// ```motoko
+    /// let lowerA = TextX.toLower('A');
+    /// // lowerA is 'a'
+    /// ```
     public func toLower(char : Char) : Char {
         switch (char) {
             case ('A') 'a';
@@ -39,6 +40,13 @@ module TextX {
         };
     };
 
+    /// Converts a lowercase character to uppercase.
+    /// If the character is not a lowercase letter, it returns the original character.
+    ///
+    /// ```motoko
+    /// let upperA = TextX.toUpper('a');
+    /// // upperA is 'A'
+    /// ```
     public func toUpper(char : Char) : Char {
         switch (char) {
             case ('a') 'A';

@@ -1,29 +1,56 @@
-# Overview
+# TextX: Advanced Text Manipulation for Motoko
 
-A general Text library for Motoko
+TextX is a text manipulation library for Motoko
 
-# Modules
+## Installation
 
-## CharX
+```bash
+mops install xtended-text
+```
+To setup MOPS package manage, follow the instructions from the [MOPS Site](https://j4mwm-bqaaa-aaaam-qajbq-cai.ic0.app/)
 
-    toLower(char : Char) : Char
+## Quick Start
 
-    toUpper(char : Char) : Char
+Here's a quick example to get you started:
 
-## TextX
+```motoko
+import TextX "mo:textx/TextX";
 
-    toLower(text : Text) : Text
+let text = "Hello, World!";
+let lowercased = TextX.toLower(text);
+assert(lowercased == "hello, world!");
 
-    toUpper(text : Text) : Text
+let sliced = TextX.slice(text, 7, 5);
+assert(sliced == "World");
 
-    slice(text : Text, startIndex : Nat, length : Nat) : Text
+let isEmpty = TextX.isEmpty("");
+assert(isEmpty);
+```
 
-    sliceToEnd(text : Text, startIndex : Nat) : Text
+## Modules
 
-    fromUtf8Bytes(bytes : Iter.Iter<Nat8>) : Iter.Iter<Char>
+### CharX
 
-    toUtf8Bytes(characters : Iter.Iter<Char>) : Iter.Iter<Nat8>
+Provides character-level operations:
 
-    isEmpty(text : Text) : Bool
+- `toLower(char : Char) : Char`: Converts a character to lowercase.
+- `toUpper(char : Char) : Char`: Converts a character to uppercase.
 
-    isEmptyOrWhitespace(text : Text) : Bool
+### TextX
+
+Offers a wide range of text manipulation functions:
+
+- `toLower(text : Text) : Text`: Converts all characters in the text to lowercase.
+- `toUpper(text : Text) : Text`: Converts all characters in the text to uppercase.
+- `slice(text : Text, startIndex : Nat, length : Nat) : Text`: Extracts a substring from the given text.
+- `sliceToEnd(text : Text, startIndex : Nat) : Text`: Extracts a substring from the given index to the end of the text.
+- `fromUtf8Bytes(bytes : Iter.Iter<Nat8>) : Iter.Iter<Char>`: Converts UTF-8 bytes to characters.
+- `toUtf8Bytes(characters : Iter.Iter<Char>) : Iter.Iter<Nat8>`: Converts characters to UTF-8 bytes.
+- `isEmpty(text : Text) : Bool`: Checks if the text is empty.
+- `isEmptyOrWhitespace(text : Text) : Bool`: Checks if the text is empty or contains only whitespace.
+
+# Testing
+
+```
+mops test
+```
