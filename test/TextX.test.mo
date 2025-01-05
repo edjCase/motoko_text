@@ -3,7 +3,6 @@ import Text "mo:base/Text";
 import Iter "mo:base/Iter";
 import Debug "mo:base/Debug";
 import { test } "mo:test";
-import Array "mo:base/Array";
 import Bool "mo:base/Bool";
 
 func assertText(actual : Text, expected : Text) {
