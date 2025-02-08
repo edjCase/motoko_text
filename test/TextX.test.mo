@@ -100,3 +100,51 @@ test(
         check("sdfsdf", false);
     },
 );
+
+test(
+    "equalIgnoreCase",
+    func() {
+        let check = func(x : Text, y : Text, expected : Bool) {
+            if (TextX.equalIgnoreCase(x, y) != expected) {
+                Debug.trap("x: '" # x # "', y: '" # y # "', expected: " # Bool.toText(expected));
+            };
+        };
+
+        // 1. Basic lowercase/uppercase comparisons
+        check("hello", "HELLO", true);
+        check("WORLD", "world", true);
+
+        // 2. Mixed case comparisons
+        check("HelloWorld", "hElLoWoRlD", true);
+        check("camelCase", "CaMeLcAsE", true);
+
+        // 3. Empty strings and spaces
+        check("", "", true);
+        check(" ", " ", true);
+        check("   ", "   ", true);
+
+        // 4. Special characters and numbers
+        check("Hello123!", "HELLO123!", true);
+        check("Test@#$%", "test@#$%", true);
+
+        // 5. Different strings that should not match
+        check("hello", "hallo", false);
+        check("test", "tset", false);
+
+        // 6. Unicode characters
+        check("café", "CAFÉ", true);
+        check("über", "ÜBER", true);
+
+        // 7. Strings with whitespace
+        check("hello world", "HELLO WORLD", true);
+        check("  spaces  ", "  SPACES  ", true);
+
+        // 8. Single characters
+        check("a", "A", true);
+        check("Z", "z", true);
+
+        // 9. Longer text
+        check("ThisIsAVeryLongStringToTest", "thirisaverylongstringtotest", false);
+        check("ThisIsAVeryLongStringToTest", "thisisaverylongstringtotest", true);
+    },
+);

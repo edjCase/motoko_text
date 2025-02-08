@@ -37,6 +37,17 @@ module TextX {
         return Text.fromIter(buffer.vals());
     };
 
+    /// Compares two text values ignoring case differences
+    ///
+    /// ```motoko
+    /// let result = TextX.equalIgnoreCase("Hello", "hello"); // true
+    /// let result2 = TextX.equalIgnoreCase("WORLD", "world"); // true
+    /// let result3 = TextX.equalIgnoreCase("Hello", "Hallo"); // false
+    /// ```
+    public func equalIgnoreCase(x : Text, y : Text) : Bool {
+        TextX.toLower(x) == TextX.toLower(y);
+    };
+
     /// Returns a substring of the given text.
     ///
     /// ```motoko

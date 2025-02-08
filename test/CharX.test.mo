@@ -4,75 +4,84 @@ import { test } "mo:test";
 test(
     "toUpper",
     func() {
+        // Basic Latin (ASCII) tests
         assert (CharX.toUpper('a') == 'A');
         assert (CharX.toUpper('b') == 'B');
-        assert (CharX.toUpper('c') == 'C');
-        assert (CharX.toUpper('d') == 'D');
-        assert (CharX.toUpper('e') == 'E');
-        assert (CharX.toUpper('f') == 'F');
-        assert (CharX.toUpper('g') == 'G');
-        assert (CharX.toUpper('h') == 'H');
-        assert (CharX.toUpper('i') == 'I');
-        assert (CharX.toUpper('j') == 'J');
-        assert (CharX.toUpper('k') == 'K');
-        assert (CharX.toUpper('l') == 'L');
-        assert (CharX.toUpper('m') == 'M');
-        assert (CharX.toUpper('n') == 'N');
-        assert (CharX.toUpper('o') == 'O');
-        assert (CharX.toUpper('p') == 'P');
-        assert (CharX.toUpper('q') == 'Q');
-        assert (CharX.toUpper('r') == 'R');
-        assert (CharX.toUpper('s') == 'S');
-        assert (CharX.toUpper('t') == 'T');
-        assert (CharX.toUpper('u') == 'U');
-        assert (CharX.toUpper('v') == 'V');
-        assert (CharX.toUpper('w') == 'W');
-        assert (CharX.toUpper('x') == 'X');
-        assert (CharX.toUpper('y') == 'Y');
         assert (CharX.toUpper('z') == 'Z');
-        assert (CharX.toUpper('A') == 'A');
-        assert (CharX.toUpper('Z') == 'Z');
-        assert (CharX.toUpper('0') == '0');
-        assert (CharX.toUpper('9') == '9');
-        assert (CharX.toUpper(' ') == ' ');
-        assert (CharX.toUpper('!') == '!');
+        assert (CharX.toUpper('A') == 'A'); // Already uppercase
+        assert (CharX.toUpper('0') == '0'); // Non-alphabetic
+        assert (CharX.toUpper(' ') == ' '); // Whitespace
+        assert (CharX.toUpper('!') == '!'); // Symbol
+
+        // Latin-1 Supplement tests
+        assert (CharX.toUpper('à') == 'À');
+        assert (CharX.toUpper('é') == 'É');
+        assert (CharX.toUpper('ç') == 'Ç');
+        assert (CharX.toUpper('ü') == 'Ü');
+        assert (CharX.toUpper('À') == 'À'); // Already uppercase
+        assert (CharX.toUpper('Þ') == 'Þ'); // Already uppercase
+
+        // Latin Extended-A tests
+        assert (CharX.toUpper('ā') == 'Ā');
+        assert (CharX.toUpper('ĉ') == 'Ĉ');
+        assert (CharX.toUpper('ė') == 'Ė');
+        assert (CharX.toUpper('į') == 'Į');
+        assert (CharX.toUpper('œ') == 'Œ');
+        assert (CharX.toUpper('ƣ') == 'Ƣ');
+        assert (CharX.toUpper('ư') == 'Ư');
+        assert (CharX.toUpper('ŵ') == 'Ŵ');
+        assert (CharX.toUpper('ŷ') == 'Ŷ');
+        assert (CharX.toUpper('ȳ') == 'Ȳ');
+        assert (CharX.toUpper('Ā') == 'Ā'); // Already uppercase
+        assert (CharX.toUpper('Œ') == 'Œ'); // Already uppercase
+        assert (CharX.toUpper('Ƣ') == 'Ƣ'); // Already uppercase
+        assert (CharX.toUpper('Ȳ') == 'Ȳ'); // Already uppercase
+
+        // German Eszett test
+        assert (CharX.toUpper('ß') == 'ẞ');
+        assert (CharX.toUpper('ẞ') == 'ẞ'); // Already uppercase
+
     },
 );
 
 test(
     "toLower",
     func() {
+        // Basic Latin (ASCII) tests
         assert (CharX.toLower('A') == 'a');
         assert (CharX.toLower('B') == 'b');
-        assert (CharX.toLower('C') == 'c');
-        assert (CharX.toLower('D') == 'd');
-        assert (CharX.toLower('E') == 'e');
-        assert (CharX.toLower('F') == 'f');
-        assert (CharX.toLower('G') == 'g');
-        assert (CharX.toLower('H') == 'h');
-        assert (CharX.toLower('I') == 'i');
-        assert (CharX.toLower('J') == 'j');
-        assert (CharX.toLower('K') == 'k');
-        assert (CharX.toLower('L') == 'l');
-        assert (CharX.toLower('M') == 'm');
-        assert (CharX.toLower('N') == 'n');
-        assert (CharX.toLower('O') == 'o');
-        assert (CharX.toLower('P') == 'p');
-        assert (CharX.toLower('Q') == 'q');
-        assert (CharX.toLower('R') == 'r');
-        assert (CharX.toLower('S') == 's');
-        assert (CharX.toLower('T') == 't');
-        assert (CharX.toLower('U') == 'u');
-        assert (CharX.toLower('V') == 'v');
-        assert (CharX.toLower('W') == 'w');
-        assert (CharX.toLower('X') == 'x');
-        assert (CharX.toLower('Y') == 'y');
         assert (CharX.toLower('Z') == 'z');
-        assert (CharX.toLower('a') == 'a');
-        assert (CharX.toLower('z') == 'z');
-        assert (CharX.toLower('0') == '0');
-        assert (CharX.toLower('9') == '9');
-        assert (CharX.toLower(' ') == ' ');
-        assert (CharX.toLower('!') == '!');
+        assert (CharX.toLower('a') == 'a'); // Already lowercase
+        assert (CharX.toLower('0') == '0'); // Non-alphabetic
+        assert (CharX.toLower(' ') == ' '); // Whitespace
+        assert (CharX.toLower('!') == '!'); // Symbol
+
+        // Latin-1 Supplement tests
+        assert (CharX.toLower('À') == 'à');
+        assert (CharX.toLower('É') == 'é');
+        assert (CharX.toLower('Ç') == 'ç');
+        assert (CharX.toLower('Ü') == 'ü');
+        assert (CharX.toLower('à') == 'à'); // Already lowercase
+        assert (CharX.toLower('þ') == 'þ'); // Already lowercase
+
+        // Latin Extended-A tests
+        assert (CharX.toLower('Ā') == 'ā');
+        assert (CharX.toLower('Ĉ') == 'ĉ');
+        assert (CharX.toLower('Ė') == 'ė');
+        assert (CharX.toLower('Į') == 'į');
+        assert (CharX.toLower('Œ') == 'œ');
+        assert (CharX.toLower('Ƣ') == 'ƣ');
+        assert (CharX.toLower('Ư') == 'ư');
+        assert (CharX.toLower('Ŵ') == 'ŵ');
+        assert (CharX.toLower('Ŷ') == 'ŷ');
+        assert (CharX.toLower('Ȳ') == 'ȳ');
+        assert (CharX.toLower('ā') == 'ā'); // Already lowercase
+        assert (CharX.toLower('œ') == 'œ'); // Already lowercase
+        assert (CharX.toLower('ƣ') == 'ƣ'); // Already lowercase
+        assert (CharX.toLower('ȳ') == 'ȳ'); // Already lowercase
+
+        // German Eszett test
+        assert (CharX.toLower('ẞ') == 'ß');
+        assert (CharX.toLower('ß') == 'ß'); // Already lowercase
     },
 );

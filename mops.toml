@@ -4,7 +4,7 @@ xtended-numbers = "0.3.1"
 
 [package]
 name = "xtended-text"
-version = "0.3.1"
+version = "1.0.0"
 description = "A library for text manipulation"
 repository = "https://github.com/edjcase/motoko_text"
 keywords = ["text"]
