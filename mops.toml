@@ -1,14 +1,13 @@
 [package]
 name = "xtended-text"
-version = "2.1.0"
+version = "2.2.0"
 description = "A library for text manipulation"
 repository = "https://github.com/edjcase/motoko_text"
 keywords = ["text", "char", "string", "manipulation"]
 license = "MIT"
 
 [dependencies]
-core = "0.6.0"
-xtended-numbers = "2.0.0"
+"core@1" = "1.0.0"
 
 [dev-dependencies]
 test = "2.1.1"

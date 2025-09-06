@@ -1,9 +1,9 @@
 import TextX "../src/TextX";
-import Text "mo:core/Text";
-import Runtime "mo:core/Runtime";
+import Text "mo:core@1/Text";
+import Runtime "mo:core@1/Runtime";
 import { test } "mo:test";
-import Bool "mo:core/Bool";
-import Nat "mo:core/Nat";
+import Bool "mo:core@1/Bool";
+import Nat "mo:core@1/Nat";
 
 func assertText(actual : Text, expected : Text) {
   if (actual != expected) {
@@ -97,7 +97,10 @@ test(
   func() {
     let check = func(value : ?Text, expected : Bool) {
       if (TextX.isNullOrEmptyOrWhitespace(value) != expected) {
-        let valueText = switch(value) { case null "null"; case (?t) "\"" # t # "\""; };
+        let valueText = switch (value) {
+          case null "null";
+          case (?t) "\"" # t # "\"";
+        };
         Runtime.trap("Value: " # valueText # ", expected: " # Bool.toText(expected));
       };
     };
@@ -116,7 +119,10 @@ test(
   func() {
     let check = func(value : ?Text, expected : Bool) {
       if (TextX.isNullOrEmpty(value) != expected) {
-        let valueText = switch(value) { case null "null"; case (?t) "\"" # t # "\""; };
+        let valueText = switch (value) {
+          case null "null";
+          case (?t) "\"" # t # "\"";
+        };
         Runtime.trap("Value: " # valueText # ", expected: " # Bool.toText(expected));
       };
     };
@@ -145,17 +151,29 @@ test(
     let checkText = func(text : Text, search : Text, expected : ?Nat) {
       let result = TextX.indexOf(text, #text search);
       if (result != expected) {
-        let expectedText = switch(expected) { case null "null"; case (?n) Nat.toText(n); };
-        let resultText = switch(result) { case null "null"; case (?n) Nat.toText(n); };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
         Runtime.trap("indexOf(\"" # text # "\", \"" # search # "\") expected: " # expectedText # ", actual: " # resultText);
       };
     };
-    
+
     let checkChar = func(text : Text, search : Char, expected : ?Nat) {
       let result = TextX.indexOf(text, #char search);
       if (result != expected) {
-        let expectedText = switch(expected) { case null "null"; case (?n) Nat.toText(n); };
-        let resultText = switch(result) { case null "null"; case (?n) Nat.toText(n); };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
         Runtime.trap("indexOf char expected: " # expectedText # ", actual: " # resultText);
       };
     };
@@ -163,8 +181,14 @@ test(
     let checkPredicate = func(text : Text, predicate : Char -> Bool, expected : ?Nat) {
       let result = TextX.indexOf(text, #predicate predicate);
       if (result != expected) {
-        let expectedText = switch(expected) { case null "null"; case (?n) Nat.toText(n); };
-        let resultText = switch(result) { case null "null"; case (?n) Nat.toText(n); };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
         Runtime.trap("indexOf predicate expected: " # expectedText # ", actual: " # resultText);
       };
     };
@@ -174,7 +198,7 @@ test(
     checkText("Hello", "", ?0);
     checkText("", "test", null);
     checkText("abcabc", "abc", ?0);
-    
+
     checkChar("Hello", 'l', ?2);
     checkChar("Hello", 'x', null);
     checkChar("Hello", 'H', ?0);
@@ -191,17 +215,29 @@ test(
     let checkText = func(text : Text, search : Text, expected : ?Nat) {
       let result = TextX.lastIndexOf(text, #text search);
       if (result != expected) {
-        let expectedText = switch(expected) { case null "null"; case (?n) Nat.toText(n); };
-        let resultText = switch(result) { case null "null"; case (?n) Nat.toText(n); };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
         Runtime.trap("lastIndexOf(\"" # text # "\", \"" # search # "\") expected: " # expectedText # ", actual: " # resultText);
       };
     };
-    
+
     let checkChar = func(text : Text, search : Char, expected : ?Nat) {
       let result = TextX.lastIndexOf(text, #char search);
       if (result != expected) {
-        let expectedText = switch(expected) { case null "null"; case (?n) Nat.toText(n); };
-        let resultText = switch(result) { case null "null"; case (?n) Nat.toText(n); };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
         Runtime.trap("lastIndexOf char expected: " # expectedText # ", actual: " # resultText);
       };
     };
@@ -209,8 +245,14 @@ test(
     let checkPredicate = func(text : Text, predicate : Char -> Bool, expected : ?Nat) {
       let result = TextX.lastIndexOf(text, #predicate predicate);
       if (result != expected) {
-        let expectedText = switch(expected) { case null "null"; case (?n) Nat.toText(n); };
-        let resultText = switch(result) { case null "null"; case (?n) Nat.toText(n); };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?n) Nat.toText(n);
+        };
         Runtime.trap("lastIndexOf predicate expected: " # expectedText # ", actual: " # resultText);
       };
     };
@@ -219,7 +261,7 @@ test(
     checkText("Hello", "xyz", null);
     checkText("Hello", "", ?5);
     checkText("abcabc", "abc", ?3);
-    
+
     checkChar("Hello", 'l', ?3);
     checkChar("Hello", 'x', null);
     checkChar("Hello", 'H', ?0);
@@ -341,8 +383,14 @@ test(
     let check = func(text : Text, index : Nat, expected : ?Char) {
       let result = TextX.charAt(text, index);
       if (result != expected) {
-        let expectedText = switch(expected) { case null "null"; case (?c) "'" # Text.fromChar(c) # "'"; };
-        let resultText = switch(result) { case null "null"; case (?c) "'" # Text.fromChar(c) # "'"; };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?c) "'" # Text.fromChar(c) # "'";
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?c) "'" # Text.fromChar(c) # "'";
+        };
         Runtime.trap("charAt(\"" # text # "\", " # Nat.toText(index) # ") expected: " # expectedText # ", actual: " # resultText);
       };
     };
@@ -448,10 +496,16 @@ test(
     let check = func(x : ?Text, y : ?Text, expected : ?Text) {
       let result = TextX.concatBothOpt(x, y);
       if (result != expected) {
-        let xText = switch(x) { case null "null"; case (?t) "\"" # t # "\""; };
-        let yText = switch(y) { case null "null"; case (?t) "\"" # t # "\""; };
-        let expectedText = switch(expected) { case null "null"; case (?t) "\"" # t # "\""; };
-        let resultText = switch(result) { case null "null"; case (?t) "\"" # t # "\""; };
+        let xText = switch (x) { case null "null"; case (?t) "\"" # t # "\"" };
+        let yText = switch (y) { case null "null"; case (?t) "\"" # t # "\"" };
+        let expectedText = switch (expected) {
+          case null "null";
+          case (?t) "\"" # t # "\"";
+        };
+        let resultText = switch (result) {
+          case null "null";
+          case (?t) "\"" # t # "\"";
+        };
         Runtime.trap("concatBothOpt(" # xText # ", " # yText # ") expected: " # expectedText # ", actual: " # resultText);
       };
     };
@@ -469,7 +523,10 @@ test(
     let check = func(text : ?Text, pattern : Text.Pattern, expected : Bool) {
       let result = TextX.startsWithOpt(text, pattern);
       if (result != expected) {
-        let textStr = switch(text) { case null "null"; case (?t) "\"" # t # "\""; };
+        let textStr = switch (text) {
+          case null "null";
+          case (?t) "\"" # t # "\"";
+        };
         Runtime.trap("startsWithOpt(" # textStr # ") expected: " # Bool.toText(expected) # ", actual: " # Bool.toText(result));
       };
     };
@@ -487,7 +544,10 @@ test(
     let check = func(text : ?Text, pattern : Text.Pattern, expected : Bool) {
       let result = TextX.endsWithOpt(text, pattern);
       if (result != expected) {
-        let textStr = switch(text) { case null "null"; case (?t) "\"" # t # "\""; };
+        let textStr = switch (text) {
+          case null "null";
+          case (?t) "\"" # t # "\"";
+        };
         Runtime.trap("endsWithOpt(" # textStr # ") expected: " # Bool.toText(expected) # ", actual: " # Bool.toText(result));
       };
     };

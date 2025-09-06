@@ -1,7 +1,7 @@
-import Iter "mo:core/Iter";
-import Text "mo:core/Text";
-import Char "mo:core/Char";
-import Nat "mo:core/Nat";
+import Iter "mo:core@1/Iter";
+import Text "mo:core@1/Text";
+import Char "mo:core@1/Char";
+import Nat "mo:core@1/Nat";
 
 module TextX {
 

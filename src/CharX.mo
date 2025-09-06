@@ -1,4 +1,4 @@
-import Char "mo:core/Char";
+import Char "mo:core@1/Char";
 
 module CharX {
   /// Converts an uppercase character to lowercase.
