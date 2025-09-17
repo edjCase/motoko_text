@@ -2,10 +2,11 @@ import Iter "mo:core@1/Iter";
 import Text "mo:core@1/Text";
 import Char "mo:core@1/Char";
 import Nat "mo:core@1/Nat";
+import Order "mo:core@1/Order";
 
 module TextX {
 
-  /// Compares two text values ignoring case differences
+  /// Compares two text values for equality ignoring case differences
   ///
   /// ```motoko
   /// let result = TextX.equalIgnoreCase("Hello", "hello"); // true
@@ -14,6 +15,22 @@ module TextX {
   /// ```
   public func equalIgnoreCase(x : Text, y : Text) : Bool {
     Text.toLower(x) == Text.toLower(y);
+  };
+
+  /// Compares two text values lexicographically ignoring case differences.
+  ///
+  /// Returns an Order.Order value indicating the comparison result.
+  ///
+  /// ```motoko
+  /// let result1 = TextX.compareIgnoreCase("apple", "Banana"); //
+  /// // result1 is Order.Less
+  /// let result2 = TextX.compareIgnoreCase("Cherry", "cherry"); //
+  /// // result2 is Order.Equal
+  /// let result3 = TextX.compareIgnoreCase("date", "Apricot"); //
+  /// // result3 is Order.Greater
+  /// ```
+  public func compareIgnoreCase(x : Text, y : Text) : Order.Order {
+    Text.compare(Text.toLower(x), Text.toLower(y));
   };
 
   /// Returns a substring of the given text.

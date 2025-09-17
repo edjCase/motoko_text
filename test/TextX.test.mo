@@ -4,6 +4,7 @@ import Runtime "mo:core@1/Runtime";
 import { test } "mo:test";
 import Bool "mo:core@1/Bool";
 import Nat "mo:core@1/Nat";
+import Order "mo:core@1/Order";
 
 func assertText(actual : Text, expected : Text) {
   if (actual != expected) {
@@ -89,6 +90,26 @@ test(
     // 9. Longer text
     check("ThisIsAVeryLongStringToTest", "thirisaverylongstringtotest", false);
     check("ThisIsAVeryLongStringToTest", "thisisaverylongstringtotest", true);
+  },
+);
+
+test(
+  "compareIgnoreCase",
+  func() {
+    let check = func(x : Text, y : Text, expected : Order.Order) {
+      let actual = TextX.compareIgnoreCase(x, y);
+      if (actual != expected) {
+        Runtime.trap("x: '" # x # "', y: '" # y # "', expected: " # debug_show (expected) # ", actual: " # debug_show (actual));
+      };
+    };
+    check("apple", "Banana", #less);
+    check("Cherry", "cherry", #equal);
+    check("date", "Date", #equal);
+    check("fig", "Fig", #equal);
+    check("grape", "Grapefruit", #less);
+    check("kiwi", "kiwi", #equal);
+    check("Lemon", "lemonade", #less);
+    check("Mango", "Mango", #equal);
   },
 );
 
